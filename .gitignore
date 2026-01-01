@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Generated repository (local testing)
+repo/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Packages
+*.pkg.tar.zst
+*.pkg.tar.gz
+*.pkg.tar.xz
