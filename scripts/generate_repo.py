@@ -9,6 +9,7 @@ Supports incremental updates - can update a single project while preserving othe
 """
 
 import argparse
+import gzip
 import hashlib
 import json
 import os
@@ -222,9 +223,19 @@ license = {pkg.license}
 """
 
 
-def create_mtree(files: list[tuple[str, Path]]) -> bytes:
-    """Generate .MTREE content."""
-    lines = ["#mtree"]
+def create_mtree(files: list[tuple[str, Path]], builddate: int) -> bytes:
+    """Generate .MTREE content (gzip compressed as required by pacman).
+
+    Format follows mtree(5) specification used by makepkg.
+    """
+    lines = [
+        "#mtree",
+        "/set type=file uid=0 gid=0 mode=644",
+    ]
+
+    # Track directories we've already added
+    added_dirs = set()
+
     for install_path, local_path in files:
         # Remove leading slash for mtree
         mtree_path = install_path.lstrip("/")
@@ -235,12 +246,18 @@ def create_mtree(files: list[tuple[str, Path]]) -> bytes:
         parts = mtree_path.split("/")
         for i in range(len(parts) - 1):
             dir_path = "/".join(parts[:i+1])
-            lines.append(f"./{dir_path} type=dir mode=0755")
+            if dir_path not in added_dirs:
+                lines.append(f"./{dir_path} time={builddate}.0 type=dir mode=755")
+                added_dirs.add(dir_path)
 
-        # Add file entry
-        lines.append(f"./{mtree_path} type=file mode=0755 size={stat.st_size} sha256digest={sha256}")
+        # Set mode for executables then add file entry
+        lines.append("/set mode=755")
+        lines.append(f"./{mtree_path} time={builddate}.0 size={stat.st_size} sha256digest={sha256}")
 
-    return "\n".join(lines).encode("utf-8")
+    # Ensure trailing newline
+    content = "\n".join(lines) + "\n"
+    # Pacman requires .MTREE to be gzip compressed
+    return gzip.compress(content.encode("utf-8"))
 
 
 def build_package(
@@ -256,7 +273,7 @@ def build_package(
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
 
-        # Create package structure
+        # Create package structure with all parent directories
         install_dir = tmppath / install_path.lstrip("/")
         install_dir.mkdir(parents=True, exist_ok=True)
 
@@ -272,11 +289,15 @@ def build_package(
         pkginfo_path = tmppath / ".PKGINFO"
         pkginfo_path.write_text(pkginfo_content)
 
-        # Create .MTREE
+        # Create .MTREE (gzip compressed as required by pacman)
         full_install_path = f"{install_path}/{binary_path.name}"
-        mtree_content = create_mtree([(full_install_path, dest_binary)])
+        mtree_content = create_mtree([(full_install_path, dest_binary)], pkg.builddate)
         mtree_path = tmppath / ".MTREE"
         mtree_path.write_bytes(mtree_content)
+
+        # Get the top-level directory (e.g., "usr" from "usr/bin")
+        # This ensures all parent dirs are included in the archive
+        top_level_dir = install_path.lstrip("/").split("/")[0]
 
         # Build tar.zst using bsdtar (preferred) or tar + zstd
         try:
@@ -287,7 +308,7 @@ def build_package(
                     "--zstd",
                     "-C", str(tmppath),
                     ".PKGINFO", ".MTREE",
-                    install_path.lstrip("/")
+                    top_level_dir
                 ],
                 capture_output=True,
                 timeout=120,
@@ -305,7 +326,7 @@ def build_package(
                     "tar", "-cf", str(tar_path),
                     "-C", str(tmppath),
                     ".PKGINFO", ".MTREE",
-                    install_path.lstrip("/")
+                    top_level_dir
                 ],
                 capture_output=True,
                 timeout=120,
@@ -330,7 +351,7 @@ def build_package(
                     "tar", "-czf", str(pkg_path_gz),
                     "-C", str(tmppath),
                     ".PKGINFO", ".MTREE",
-                    install_path.lstrip("/")
+                    top_level_dir
                 ],
                 capture_output=True,
                 timeout=120,
@@ -608,6 +629,11 @@ def main():
         action="store_true",
         help="Skip GPG signing",
     )
+    parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="Force rebuild packages (with --project: only that project, without: all)",
+    )
 
     args = parser.parse_args()
 
@@ -658,6 +684,43 @@ def main():
     print(f"Processing {len(projects_to_process)} project(s)...")
     if preserved_packages:
         print(f"Preserving {len(preserved_packages)} package(s) from other projects")
+
+    # If rebuild mode, clear existing packages for projects being updated
+    if args.rebuild and not args.dry_run:
+        # Build set of filenames to remove (only for projects being updated)
+        files_to_remove = {
+            pkg.filename for pkg in existing_packages
+            if pkg.project_repo in projects_to_update
+        }
+
+        if args.project:
+            print(f"\n[Rebuild mode: clearing packages for {args.project}]")
+        else:
+            print("\n[Rebuild mode: clearing all packages]")
+
+        for arch in settings.architectures:
+            arch_dir = output_dir / arch
+            if arch_dir.exists():
+                for pkg_file in arch_dir.glob("*.pkg.tar.*"):
+                    # Only remove if it belongs to projects being updated
+                    if pkg_file.name in files_to_remove or not args.project:
+                        pkg_file.unlink()
+                        print(f"  Removed {pkg_file}")
+                # Remove database files (will be regenerated)
+                for db_file in arch_dir.glob("*.db*"):
+                    db_file.unlink()
+                for files_file in arch_dir.glob("*.files*"):
+                    files_file.unlink()
+
+        # Update preserved packages (keep packages from other projects)
+        if args.project:
+            # Keep packages from projects NOT being rebuilt
+            preserved_packages = [
+                pkg for pkg in existing_packages
+                if pkg.project_repo not in projects_to_update
+            ]
+        else:
+            preserved_packages = []
 
     new_packages: list[PacmanPackage] = []
 
