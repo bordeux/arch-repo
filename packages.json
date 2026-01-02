@@ -1,4 +1,69 @@
 {
-  "packages": [],
-  "updated": "2026-01-02T01:26:05.720978+00:00"
+  "packages": [
+    {
+      "pkgname": "tmpltool",
+      "pkgver": "1.2.4",
+      "pkgrel": 1,
+      "arch": "x86_64",
+      "pkgdesc": "tmpltool - A fast template renderer supporting many datasources and hundreds of functions.",
+      "url": "https://github.com/bordeux/tmpltool",
+      "license": "MIT",
+      "packager": "Chris Bednarczyk <arch@bordeux.net>",
+      "builddate": 1767317658,
+      "size": 2458220,
+      "project_repo": "bordeux/tmpltool",
+      "source_url": "https://github.com/bordeux/tmpltool/releases/download/v1.2.4/tmpltool-linux-x86_64.tar.gz",
+      "filename": "tmpltool-1.2.4-1-x86_64.pkg.tar.zst",
+      "sha256": "734e408e5f4f2f6c9bc3107e8e18efb364996a2a6b08b2e40d29630087f03dae"
+    },
+    {
+      "pkgname": "tmpltool",
+      "pkgver": "1.2.4",
+      "pkgrel": 1,
+      "arch": "aarch64",
+      "pkgdesc": "tmpltool - A fast template renderer supporting many datasources and hundreds of functions.",
+      "url": "https://github.com/bordeux/tmpltool",
+      "license": "MIT",
+      "packager": "Chris Bednarczyk <arch@bordeux.net>",
+      "builddate": 1767317658,
+      "size": 2633702,
+      "project_repo": "bordeux/tmpltool",
+      "source_url": "https://github.com/bordeux/tmpltool/releases/download/v1.2.4/tmpltool-linux-aarch64.tar.gz",
+      "filename": "tmpltool-1.2.4-1-aarch64.pkg.tar.zst",
+      "sha256": "e99927780235f9fb597afc45458b917bc5e0f2d474426fb8ba71e5664a6ca52e"
+    },
+    {
+      "pkgname": "tmpltool",
+      "pkgver": "1.1.2",
+      "pkgrel": 1,
+      "arch": "x86_64",
+      "pkgdesc": "tmpltool - A fast template renderer supporting many datasources and hundreds of functions.",
+      "url": "https://github.com/bordeux/tmpltool",
+      "license": "MIT",
+      "packager": "Chris Bednarczyk <arch@bordeux.net>",
+      "builddate": 1767317658,
+      "size": 2347933,
+      "project_repo": "bordeux/tmpltool",
+      "source_url": "https://github.com/bordeux/tmpltool/releases/download/v1.1.2/tmpltool-linux-x86_64.tar.gz",
+      "filename": "tmpltool-1.1.2-1-x86_64.pkg.tar.zst",
+      "sha256": "9618ed363f03e7da6af2266680874d9bd025042d4ffb62d8d86a4c0a527ae006"
+    },
+    {
+      "pkgname": "tmpltool",
+      "pkgver": "1.1.2",
+      "pkgrel": 1,
+      "arch": "aarch64",
+      "pkgdesc": "tmpltool - A fast template renderer supporting many datasources and hundreds of functions.",
+      "url": "https://github.com/bordeux/tmpltool",
+      "license": "MIT",
+      "packager": "Chris Bednarczyk <arch@bordeux.net>",
+      "builddate": 1767317658,
+      "size": 2514795,
+      "project_repo": "bordeux/tmpltool",
+      "source_url": "https://github.com/bordeux/tmpltool/releases/download/v1.1.2/tmpltool-linux-aarch64.tar.gz",
+      "filename": "tmpltool-1.1.2-1-aarch64.pkg.tar.zst",
+      "sha256": "9e15e1a8575e26c36b659e760edd5f2bef634406a1bc146a44e3949dcf5ed4cf"
+    }
+  ],
+  "updated": "2026-01-02T01:34:19.763777+00:00"
 }
