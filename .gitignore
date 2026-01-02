@@ -25,3 +25,4 @@ Thumbs.db
 *.pkg.tar.zst
 *.pkg.tar.gz
 *.pkg.tar.xz
+*.rsa
