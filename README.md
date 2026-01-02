@@ -1,5 +1,7 @@
 # Arch Repository Generator
 
+[![Update Arch Repository](https://github.com/bordeux/arch-repo/actions/workflows/update-repo.yml/badge.svg)](https://github.com/bordeux/arch-repo/actions/workflows/update-repo.yml)
+
 Generate an Arch Linux Pacman repository from GitHub releases containing binary tarballs. Downloads `.tar.gz` files, extracts binaries, and repackages as `.pkg.tar.zst`.
 
 **No changes required to your release process** - works with standard binary releases.
