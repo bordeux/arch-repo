@@ -1,40 +1,13 @@
 # Arch Repository Generator - Project Configuration
-#
-# Define GitHub repositories that release binary tarballs.
-# The generator will fetch releases, repackage as .pkg.tar.zst, and build a Pacman repository.
 
-# Repository settings
 settings:
-  # Repository name (used in pacman.conf)
   name: bordeux
-  # Repository base URL
   baseurl: https://bordeux.github.io/arch-repo
-  # Architectures to support
-  architectures:
-    - x86_64
-    - aarch64
-  # Repository description
-  description: "Bordeux Arch Packages"
-  # Packager info
   packager: "Chris Bednarczyk <arch@bordeux.net>"
 
-# Projects to include in the repository
 projects:
   - repo: bordeux/tmpltool
-    # Package name (defaults to repo name)
-    name: tmpltool
-    # Package description
-    description: "A fast and simple command-line template rendering tool"
-    # License
-    license: MIT
-    # Number of past versions to keep
     keep_versions: 1
-    # Binary name to install (defaults to package name)
-    binary_name: tmpltool
-    # Install path (defaults to /usr/bin)
-    install_path: /usr/bin
-    # Asset patterns for each architecture
-    # These should be tar.gz/zip files containing the binary
     asset_patterns:
       x86_64: "linux.*amd64.*\\.tar\\.gz$"
       aarch64: "linux.*arm64.*\\.tar\\.gz$"

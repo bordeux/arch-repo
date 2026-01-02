@@ -133,6 +133,10 @@ class GitHubAPI:
         """Get releases for a repository."""
         return self._request(f"repos/{repo}/releases?per_page={per_page}")
 
+    def get_repo(self, repo: str) -> dict:
+        """Get repository information including description."""
+        return self._request(f"repos/{repo}")
+
 
 def extract_version(tag: str) -> str:
     """Extract version number from tag (removes 'v' prefix)."""
@@ -364,6 +368,15 @@ def fetch_releases(
     """Fetch and process releases for a project."""
     releases_data = github.get_releases(project.repo)
 
+    # Fetch description from GitHub if not provided
+    description = project.description
+    if not description:
+        try:
+            repo_info = github.get_repo(project.repo)
+            description = repo_info.get("description") or f"{project.name} from GitHub"
+        except Exception:
+            description = f"{project.name} from GitHub"
+
     # Group releases by major.minor version
     releases_by_minor: dict[str, dict] = {}
 
@@ -418,7 +431,7 @@ def fetch_releases(
                     pkgver=version,
                     pkgrel=1,
                     arch=arch,
-                    pkgdesc=project.description or f"{project.name} from GitHub",
+                    pkgdesc=description,
                     url=f"https://github.com/{project.repo}",
                     license=project.license,
                     packager=settings.packager,
